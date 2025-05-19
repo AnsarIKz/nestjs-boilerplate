@@ -1,4 +1,4 @@
-Nestjs, Prisma ORM, PostgreSQL, Fastify, JWT auth, Mailer, Storage, Logger, Swagger.
+Nestjs, Prisma ORM, PostgreSQL, Fastify, Bun, JWT auth, Mailer, Storage, Logger, Swagger.
 
 ## Особенности
 
