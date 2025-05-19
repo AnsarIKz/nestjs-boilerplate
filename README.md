@@ -1,6 +1,4 @@
-# NestJS Prisma Boilerplate
-
-Современный, готовый к production стартер для NestJS с использованием Prisma ORM, PostgreSQL, Fastify и полноценной JWT аутентификацией.
+Nestjs, Prisma ORM, PostgreSQL, Fastify, JWT auth, Mailer, Storage, Logger, Swagger.
 
 ## Особенности
 
