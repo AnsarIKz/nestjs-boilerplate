@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  phoneNumber     String?   @unique
+  profileImageUrl String?
+  language        String?   @default("en")
+  currency        String?   @default("USD")
+  isActive        Boolean   @default(true)
+  role            Role      @default(USER)
+  resetToken      String?
+  resetTokenExpiry DateTime?
+  refreshTokens   RefreshToken[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  revoked   Boolean  @default(false)
+  ipAddress String?
+  userAgent String?
+
+  @@map("refresh_tokens")
+}
+
+model VerificationCode {
+  id        String   @id @default(uuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("verification_codes")
+}
+
+enum Role {
+  USER
+  ADMIN
+} 

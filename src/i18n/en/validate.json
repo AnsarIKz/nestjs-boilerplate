@@ -1,0 +1,13 @@
+{
+  "email": {
+    "required": "Please enter your email address",
+    "invalid": "Please enter a valid email address"
+  },
+  "password": {
+    "minLength": "Password must be at least {minLength} characters"
+  },
+  "phone": {
+    "required": "Please enter your phone number",
+    "invalid": "Please enter a valid phone number in international format (e.g., +77001234567)"
+  }
+}

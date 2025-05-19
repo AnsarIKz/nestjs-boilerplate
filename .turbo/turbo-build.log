@@ -1,0 +1,4 @@
+[?9001h[?1004h[?25l[2J[m[35m[2m[H$[m[1m[2m[1Crimraf dist
+]0;C:\Windows\system32\cmd.exe[?25h[22m[35m[2m$[m [1m[2mnest build
+[22m[38;2;0;0;0m[48;2;60;190;100m[1m Info [m "typeCheck" will not have any effect when "builder" is not "swc".
+[?9001l[?1004l
