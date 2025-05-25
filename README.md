@@ -62,6 +62,16 @@ JWT_SECRET=your_jwt_secret_key_here
 JWT_REFRESH_SECRET=your_refresh_secret_key_here
 ```
 
+### UP Database
+
+```bash
+# Запуск PostgreSQL в Docker
+docker-compose up -d
+
+# Ожидание готовности базы данных (опционально)
+docker-compose logs -f postgres
+```
+
 ### Настройка базы данных
 
 ```bash

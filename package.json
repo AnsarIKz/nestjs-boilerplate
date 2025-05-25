@@ -1,7 +1,7 @@
 {
   "name": "nestjs-boilerplate",
   "version": "1.0.0",
-  "description": "NestJS project structure template with best practices using Fastify, Prisma, PostgreSQL, and authentication",
+  "description": "NestJS project structure template with best practices using Fastify, Prisma, PostgreSQL, with realized authentication,",
   "main": "dist/main.js",
   "scripts": {
     "prebuild": "rimraf dist",
