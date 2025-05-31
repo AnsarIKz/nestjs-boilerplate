@@ -30,7 +30,25 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     UsersModule,
     MailerModule,
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    {
+      provide: AuthInstanceInjectKey,
+      useFactory: () => {
+        let auth: AuthInstance;
+        return {
+          get() {
+            return auth;
+          },
+          set(value: AuthInstance) {
+            auth = value;
+          },
+        };
+      },
+    },
+  ],
   controllers: [AuthController],
 })
 export class AuthModule implements NestModule {

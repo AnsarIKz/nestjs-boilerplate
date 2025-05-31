@@ -8,30 +8,51 @@ import { I18nService } from 'nestjs-i18n';
 
 @Injectable()
 export class MailerService {
-  private readonly transporter: nodemailer.Transporter;
+  private readonly transporter: nodemailer.Transporter | null;
   private readonly logger = new Logger(MailerService.name);
 
   constructor(
     private readonly configService: ConfigService,
     private readonly i18n: I18nService,
   ) {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get('MAIL_HOST'),
-      port: parseInt(this.configService.get<string>('MAIL_PORT') || '587', 10),
-      secure: this.configService.get<string>('MAIL_SECURE') === 'true',
-      auth: {
-        user: this.configService.get('MAIL_USER'),
-        pass: this.configService.get('MAIL_PASSWORD'),
-      },
-      logger: true,
-      debug: true,
-    });
+    const mailHost = this.configService.get('MAIL_HOST');
+    const mailUser = this.configService.get('MAIL_USER');
 
-    // Verify SMTP connection
-    this.transporter
-      .verify()
-      .then(() => this.logger.log('SMTP connection verified'))
-      .catch((err) => this.logger.error('SMTP connection error', err));
+    // Only create transporter if email settings are provided
+    if (mailHost && mailUser) {
+      this.transporter = nodemailer.createTransport({
+        host: mailHost,
+        port: parseInt(this.configService.get<string>('MAIL_PORT') || '587', 10),
+        secure: this.configService.get<string>('MAIL_SECURE') === 'true',
+        auth: {
+          user: mailUser,
+          pass: this.configService.get('MAIL_PASSWORD'),
+        },
+        logger: false, // Disable logger to reduce noise
+        debug: false,
+        connectionTimeout: 5000, // 5 second timeout
+        greetingTimeout: 5000,
+        socketTimeout: 10000,
+      });
+
+      // Verify SMTP connection asynchronously (non-blocking)
+      setTimeout(() => {
+        if (this.transporter) {
+          this.transporter
+            .verify()
+            .then(() => this.logger.log('SMTP connection verified'))
+            .catch((err) =>
+              this.logger.warn(
+                'SMTP connection failed (email functionality disabled)',
+                err.message,
+              ),
+            );
+        }
+      }, 1000);
+    } else {
+      this.logger.warn('Email configuration not provided. Email functionality disabled.');
+      this.transporter = null;
+    }
   }
 
   private async renderTemplate(
@@ -102,6 +123,11 @@ export class MailerService {
     verificationCode: string,
     lang: string = 'en',
   ): Promise<void> {
+    if (!this.transporter) {
+      this.logger.warn('Email sending disabled - no transporter configured');
+      return;
+    }
+
     try {
       const subject = 'Email Verification';
       const text = `Your verification code is: ${verificationCode}`;
@@ -130,6 +156,11 @@ export class MailerService {
   }
 
   async sendWelcomeEmail(email: string, name: string, lang: string = 'en'): Promise<void> {
+    if (!this.transporter) {
+      this.logger.warn('Email sending disabled - no transporter configured');
+      return;
+    }
+
     try {
       const subject = 'Welcome to Our Platform';
       const text = `Welcome ${name}! Thank you for joining our platform.`;
@@ -160,6 +191,11 @@ export class MailerService {
     verificationCode: string,
     lang: string = 'en',
   ): Promise<void> {
+    if (!this.transporter) {
+      this.logger.warn('Email sending disabled - no transporter configured');
+      return;
+    }
+
     try {
       const subject = 'Password Reset Request';
       const text = `Your password reset code is: ${verificationCode}`;

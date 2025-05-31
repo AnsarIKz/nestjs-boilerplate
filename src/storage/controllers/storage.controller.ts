@@ -14,6 +14,12 @@ import { StorageService } from '../services/storage.service';
 import { FileUploadResultDto } from '../dto/file-upload.dto';
 import { FastifyRequest } from 'fastify';
 
+// Расширяем тип FastifyRequest для multipart поддержки
+interface FastifyRequestWithMultipart extends FastifyRequest {
+  isMultipart(): boolean;
+  file(): Promise<any>;
+}
+
 @ApiTags('storage')
 @Controller('storage')
 export class StorageController {
@@ -36,7 +42,7 @@ export class StorageController {
       },
     },
   })
-  async uploadFile(@Req() req: FastifyRequest): Promise<FileUploadResultDto> {
+  async uploadFile(@Req() req: FastifyRequestWithMultipart): Promise<FileUploadResultDto> {
     // Handle raw multipart upload using Fastify's built-in multipart support
     if (!req.isMultipart()) {
       throw new BadRequestException('Request is not multipart');

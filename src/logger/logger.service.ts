@@ -1,58 +1,29 @@
 import { Injectable, Logger } from '@nestjs/common';
-import pino from 'pino';
 import { ConfigService } from '@app/config/config.service';
 
 @Injectable()
 export class LoggerService extends Logger {
-  private readonly pinoInstance: any;
-
   constructor(private readonly config: ConfigService) {
-    super();
-
-    const datadog = this.config.getDatadogConfig();
-
-    this.pinoInstance = pino({
-      level: 'info',
-      transport: {
-        targets: [
-          // Console transport for local logs
-          {
-            target: 'pino-pretty',
-            level: 'info',
-            options: {
-              colorize: true,
-            },
-          },
-          // Datadog transport for remote logs
-          {
-            target: 'pino-datadog-transport',
-            level: 'info',
-            options: {
-              apiKey: datadog.apiKey,
-              ddsource: 'nodejs',
-              service: datadog.serviceName,
-              hostname: datadog.hostName,
-              site: datadog.intakeRegion,
-              ddtags: `env:${process.env.NODE_ENV}`,
-            },
-          },
-        ],
-      },
-    });
+    super('Application');
   }
 
-  log(message: string): void {
-    super.log(message);
-    this.pinoInstance.info(message);
+  log(message: string, context?: string): void {
+    super.log(message, context || 'Application');
   }
 
-  error(message: string, trace: string): void {
-    super.error(message, trace);
-    this.pinoInstance.error({ message, trace });
+  error(message: string, trace?: string, context?: string): void {
+    super.error(message, trace, context || 'Application');
   }
 
-  warn(message: string): void {
-    super.warn(message);
-    this.pinoInstance.warn(message);
+  warn(message: string, context?: string): void {
+    super.warn(message, context || 'Application');
+  }
+
+  debug(message: string, context?: string): void {
+    super.debug(message, context || 'Application');
+  }
+
+  verbose(message: string, context?: string): void {
+    super.verbose(message, context || 'Application');
   }
 }

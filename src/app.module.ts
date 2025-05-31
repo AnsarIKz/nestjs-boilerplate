@@ -1,61 +1,38 @@
 import * as path from 'path';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { LoggerModule } from 'nestjs-pino';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { I18nModule } from 'nestjs-i18n';
-import { CommonModule } from './common/common.module';
-import { StorageModule } from './storage/storage.module';
-import { AuthModule } from './auth/auth.module';
-import { MailerModule } from './mailer/mailer.module';
-import { UsersModule } from './users/users.module';
-import { CookieResolver, HeaderResolver, QueryResolver, AcceptLanguageResolver } from 'nestjs-i18n';
 import { ConfigModule } from './config/config.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { CommonModule } from './common/common.module';
+import { MailerModule } from './mailer/mailer.module';
+import { StorageModule } from './storage/storage.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { I18nModule } from 'nestjs-i18n';
+import { CookieResolver, HeaderResolver, QueryResolver, AcceptLanguageResolver } from 'nestjs-i18n';
 
 @Module({
   imports: [
-    // Configuration
     ConfigModule,
-
-    // Logger
-    LoggerModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const logConfig = configService.get('logging');
-        return {
-          pinoHttp: {
-            level: logConfig.level,
-            transport: logConfig.pretty ? { target: 'pino-pretty' } : undefined,
-          },
-        };
-      },
-    }),
+    PrismaModule,
 
     // Rate limiting
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const securityConfig = configService.get('security');
         return {
           throttlers: [
             {
               name: 'default',
-              ttl: securityConfig?.rateLimitTtl || 60000,
-              limit: securityConfig?.rateLimitLimit || 100,
+              ttl: parseInt(process.env.RATE_LIMIT_TTL || '60000', 10),
+              limit: parseInt(process.env.RATE_LIMIT_LIMIT || '100', 10),
             },
           ],
         };
       },
     }),
-
-    // Database
-    PrismaModule,
-
-    // Feature modules
-    AuthModule,
-    UsersModule,
 
     // I18n
     I18nModule.forRoot({
@@ -75,6 +52,8 @@ import { PrismaModule } from './prisma/prisma.module';
     CommonModule,
     StorageModule.register(),
     MailerModule,
+    UsersModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [
