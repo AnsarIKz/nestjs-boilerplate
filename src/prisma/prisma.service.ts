@@ -19,7 +19,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     });
   }
 
-  async onModuleInit() {
+  onModuleInit() {
     // Запускаем подключение в фоне, не блокируя инициализацию
     this.connectInBackground();
   }

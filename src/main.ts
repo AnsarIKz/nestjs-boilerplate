@@ -13,6 +13,7 @@ import * as yaml from 'js-yaml';
 import * as compression from '@fastify/compress';
 import * as helmet from '@fastify/helmet';
 import * as cors from '@fastify/cors';
+import fastifyMultipart from '@fastify/multipart';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -93,6 +94,17 @@ async function bootstrap() {
     });
     logger.log('✓ CORS plugin registered');
 
+    // Register multipart plugin for file uploads
+    const fastifyInstance = app.getHttpAdapter().getInstance() as unknown as FastifyInstance;
+    await fastifyInstance.register(fastifyMultipart as any, {
+      limits: {
+        fileSize: configService.getStorageConfig().maxFileSize,
+        files: 1,
+      },
+      attachFieldsToBody: false,
+    });
+    logger.log('✓ Multipart plugin registered');
+
     // Setup Swagger API documentation
     if (process.env.NODE_ENV !== 'production') {
       const config = new DocumentBuilder()
@@ -106,7 +118,6 @@ async function bootstrap() {
       SwaggerModule.setup(swaggerConfig?.path || 'apidoc', app, document);
 
       // Add YAML format OpenAPI document endpoint
-      const fastifyInstance = app.getHttpAdapter().getInstance() as unknown as FastifyInstance;
       fastifyInstance.get('/openapi.yaml', (_, reply) => {
         reply.header('Content-Type', 'text/yaml');
         reply.send(yaml.dump(document));
@@ -119,12 +130,16 @@ async function bootstrap() {
     await app.listen(port ?? 7009, host ?? 'localhost');
     const appUrl = await app.getUrl();
 
+    console.log('📄 Loaded .env from:', path.resolve(process.cwd(), '.env'));
+
     logger.log(`🚀 Application is running on: ${appUrl}`);
     logger.log(`📡 API available at: ${appUrl}/${apiPrefix}`);
 
     if (process.env.NODE_ENV !== 'production') {
       const swaggerPath = swaggerConfig?.path || 'apidoc';
       logger.log(`📚 Swagger API documentation: ${appUrl}/${swaggerPath}`);
+      logger.log(`📋 OpenAPI JSON: ${appUrl}/openapi.json`);
+      logger.log(`📄 OpenAPI YAML: ${appUrl}/openapi.yaml`);
     }
   } catch (error) {
     logger.error('Failed to start application:', error);
