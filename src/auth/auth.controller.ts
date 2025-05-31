@@ -216,7 +216,7 @@ export class AuthController {
       },
     },
   })
-  async generateToken() {
+  generateToken() {
     return { message: 'Token generation not yet implemented' };
   }
 

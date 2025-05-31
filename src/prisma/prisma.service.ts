@@ -18,9 +18,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleInit() {
     this.logger.log('Connecting to database...');
-    
+
     await this.$connect();
-    
+
     // Log queries in development mode
     if (process.env.NODE_ENV === 'development') {
       this.$on('query', (e) => {
@@ -28,7 +28,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
         this.logger.debug(`Duration: ${e.duration}ms`);
       });
     }
-    
+
     this.logger.log('Connected to database');
   }
 

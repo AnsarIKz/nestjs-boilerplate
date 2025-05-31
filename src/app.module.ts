@@ -1,6 +1,6 @@
 import * as path from 'path';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -10,23 +10,15 @@ import { StorageModule } from './storage/storage.module';
 import { AuthModule } from './auth/auth.module';
 import { MailerModule } from './mailer/mailer.module';
 import { UsersModule } from './users/users.module';
-import {
-  CookieResolver,
-  HeaderResolver,
-  QueryResolver,
-  AcceptLanguageResolver,
-} from 'nestjs-i18n';
-import configuration, { validationSchema } from './config/configuration';
+import { CookieResolver, HeaderResolver, QueryResolver, AcceptLanguageResolver } from 'nestjs-i18n';
+import { ConfigModule } from './config/config.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
     // Configuration
-    ConfigModule.forRoot({
-      isGlobal: true,
-      load: [configuration],
-      validationSchema,
-    }),
-    
+    ConfigModule,
+
     // Logger
     LoggerModule.forRootAsync({
       inject: [ConfigService],
@@ -35,33 +27,36 @@ import configuration, { validationSchema } from './config/configuration';
         return {
           pinoHttp: {
             level: logConfig.level,
-            transport: logConfig.pretty
-              ? { target: 'pino-pretty' }
-              : undefined,
+            transport: logConfig.pretty ? { target: 'pino-pretty' } : undefined,
           },
         };
       },
     }),
-    
+
     // Rate limiting
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const securityConfig = configService.get('security');
         return {
-          ttl: securityConfig.rateLimitTtl,
-          limit: securityConfig.rateLimitLimit,
+          throttlers: [
+            {
+              name: 'default',
+              ttl: securityConfig?.rateLimitTtl || 60000,
+              limit: securityConfig?.rateLimitLimit || 100,
+            },
+          ],
         };
       },
     }),
-    
+
     // Database
     PrismaModule,
-    
+
     // Feature modules
     AuthModule,
     UsersModule,
-    
+
     // I18n
     I18nModule.forRoot({
       fallbackLanguage: 'en',
@@ -76,7 +71,7 @@ import configuration, { validationSchema } from './config/configuration';
         AcceptLanguageResolver,
       ],
     }),
-    
+
     CommonModule,
     StorageModule.register(),
     MailerModule,

@@ -25,7 +25,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ logger: true }),
-    { bufferLogs: true }
+    { bufferLogs: true },
   );
 
   // Get application configuration
@@ -70,6 +70,7 @@ async function bootstrap() {
   );
 
   // Register Fastify plugins
+
   await app.register(compression);
   await app.register(helmet, {
     contentSecurityPolicy: {

@@ -71,12 +71,12 @@ export class AuthService {
 
     const payload = { email: existingUser.email, sub: existingUser.id, role: existingUser.role };
     const accessToken = this.jwtService.sign(payload);
-    
+
     // Create refresh token
     const refreshToken = await this.createRefreshToken(
       existingUser.id,
       this.getIpAddress(),
-      this.getUserAgent()
+      this.getUserAgent(),
     );
 
     return {
@@ -142,8 +142,8 @@ export class AuthService {
     // Optional: Create a new refresh token and revoke the old one for better security
     const newRefreshToken = await this.createRefreshToken(
       user.id,
-      refreshToken.ipAddress,
-      refreshToken.userAgent
+      refreshToken.ipAddress || undefined,
+      refreshToken.userAgent || undefined,
     );
 
     // Revoke old token
@@ -284,12 +284,12 @@ export class AuthService {
     // Generate JWT token
     const payload = { email: user.email, sub: user.id, role: user.role };
     const accessToken = this.jwtService.sign(payload);
-    
+
     // Create refresh token
     const refreshToken = await this.createRefreshToken(
       user.id,
       this.getIpAddress(),
-      this.getUserAgent()
+      this.getUserAgent(),
     );
 
     return {
@@ -388,7 +388,7 @@ export class AuthService {
     }
 
     const code = await this.generateAndStoreCode(email);
-    await this.mailerService.sendPasswordResetEmail(email, code);
+    await this.mailerService.sendForgotPasswordEmail(email, code);
 
     return { message: 'If the email is registered, a reset code has been sent' };
   }
