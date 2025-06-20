@@ -24,6 +24,7 @@ model User {
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
   refreshTokens    RefreshToken[]
+  bookings         Booking[]
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
@@ -59,6 +60,57 @@ model VerificationCode {
   @@map("verification_codes")
 }
 
+model Restaurant {
+  id              String    @id @default(uuid())
+  name            String
+  description     String?
+  address         String
+  phoneNumber     String
+  email           String?
+  website         String?
+  cuisine         String[]
+  priceRange      PriceRange @default(MODERATE)
+  rating          Float?    @default(0)
+  capacity        Int
+  imageUrls       String[]  @default([])
+  openingHours    Json      // Format: {"monday": {"open": "09:00", "close": "22:00"}, ...}
+  isActive        Boolean   @default(true)
+  bookings        Booking[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([cuisine])
+  @@index([priceRange])
+  @@index([rating])
+  @@index([isActive])
+  @@map("restaurants")
+}
+
+model Booking {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurantId  String
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  bookingDate   DateTime
+  bookingTime   String        // Format: "19:00"
+  guestCount    Int
+  specialRequests String?
+  status        BookingStatus @default(PENDING)
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  notes         String?       // Internal notes for restaurant
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([restaurantId])
+  @@index([bookingDate])
+  @@index([status])
+  @@map("bookings")
+}
+
 enum VerificationType {
   REGISTRATION
   PASSWORD_RESET
@@ -67,4 +119,20 @@ enum VerificationType {
 enum Role {
   USER
   ADMIN
+  RESTAURANT_OWNER
+}
+
+enum PriceRange {
+  BUDGET        // $
+  MODERATE      // $$
+  EXPENSIVE     // $$$
+  LUXURY        // $$$$
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
 } 
