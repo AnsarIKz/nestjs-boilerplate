@@ -133,7 +133,7 @@ export class UsersService {
 
     // Remove undefined values from update data
     const updateData = Object.fromEntries(
-      Object.entries(updateUserDto).filter(([_, value]) => value !== undefined),
+      Object.entries(updateUserDto).filter(([, value]) => value !== undefined),
     );
 
     // Ensure email cannot be updated

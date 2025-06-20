@@ -36,7 +36,7 @@ export class SmsService {
 
           this.logger.log(`WhatsApp verification sent to ${phoneNumber}: ${result.sid}`);
           return true;
-        } catch (whatsappError) {
+        } catch {
           this.logger.warn(`WhatsApp failed for ${phoneNumber}, falling back to SMS`);
         }
       }

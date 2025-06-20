@@ -1,29 +1,6 @@
-import {
-  Controller,
-  Body,
-  UseGuards,
-  Delete,
-  Get,
-  Inject,
-  Post,
-  Query,
-  Request,
-  Logger,
-  HttpCode,
-  HttpStatus,
-  NotFoundException,
-} from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { Controller, Body, UseGuards, Get, Post, Request, Logger } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import { ConfigService } from '@app/config/config.service';
-import { UsersService } from '@app/users/services/users.service';
 import { AuthService } from './auth.service';
 import { SendVerificationCodeDto } from './dto/create-user.dto';
 import { VerifyPhoneDto } from './dto/verify-phone.dto';
@@ -31,19 +8,13 @@ import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { JwtService } from '@nestjs/jwt';
 
 @ApiTags('auth')
 @Controller('/auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly configService: ConfigService,
-    private readonly authService: AuthService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('send-verification')
   @ApiOperation({ summary: 'Send SMS verification code to phone number' })
@@ -189,90 +160,6 @@ export class AuthController {
     return this.authService.logout(req.user.userId);
   }
 
-  @Get('token')
-  @ApiOperation({ summary: 'Verify or fetch a token' })
-  @ApiQuery({
-    name: 'token',
-    required: false,
-    description: 'Token to verify',
-    type: String,
-  })
-  @ApiQuery({
-    name: 'id',
-    required: false,
-    description: 'User ID associated with the token',
-    type: String,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Token information',
-    schema: {
-      example: {
-        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        id: 'user-uuid',
-      },
-    },
-  })
-  getOrVerifyToken(@Query('token') token?: string, @Query('id') id?: string) {
-    this.logger.log(`Verifying token: ${token} for ID: ${id}`);
-    return { token, id };
-  }
-
-  @Post('token')
-  @ApiOperation({ summary: 'Generate a new token' })
-  @ApiResponse({
-    status: 201,
-    description: 'Token generated successfully',
-    schema: {
-      example: {
-        message: 'Token generated successfully',
-        token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-      },
-    },
-  })
-  generateToken() {
-    return { message: 'Token generation not yet implemented' };
-  }
-
-  @Delete('token')
-  @ApiOperation({ summary: 'Delete a token' })
-  @ApiBearerAuth()
-  @ApiResponse({
-    status: 200,
-    description: 'Token deleted successfully',
-    schema: {
-      example: {
-        message: 'Token deleted successfully',
-      },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - Invalid or missing token',
-  })
-  deleteToken() {
-    this.logger.log('Deleting token');
-    return { message: 'Token deleted' };
-  }
-
-  @Get('session')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get current user session info' })
-  @ApiResponse({
-    status: 200,
-    description: 'Current user session',
-  })
-  async getSession(@Request() req) {
-    return {
-      user: {
-        id: req.user.userId,
-        phoneNumber: req.user.phoneNumber,
-        role: req.user.role,
-      },
-    };
-  }
-
   @Post('forgot-password')
   @ApiOperation({ summary: 'Send password reset code to phone number' })
   @ApiBody({
@@ -355,5 +242,23 @@ export class AuthController {
   async createAdmin(@Body() createAdminDto: CreateAdminDto) {
     this.logger.log(`Creating admin: ${createAdminDto.phoneNumber}`);
     return this.authService.createAdmin(createAdminDto);
+  }
+
+  @Get('session')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user session info' })
+  @ApiResponse({
+    status: 200,
+    description: 'Current user session',
+  })
+  getSession(@Request() req) {
+    return {
+      user: {
+        id: req.user.userId,
+        phoneNumber: req.user.phoneNumber,
+        role: req.user.role,
+      },
+    };
   }
 }

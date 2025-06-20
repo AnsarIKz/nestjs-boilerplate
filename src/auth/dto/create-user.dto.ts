@@ -1,14 +1,5 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MinLength,
-  Matches,
-  IsPhoneNumber,
-} from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { i18nValidationMessage } from 'nestjs-i18n';
+import { IsNotEmpty, IsPhoneNumber } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SendVerificationCodeDto {
   @ApiProperty({

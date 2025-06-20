@@ -1,6 +1,5 @@
 import {
   ConflictException,
-  Inject,
   Injectable,
   Logger,
   BadRequestException,
@@ -16,11 +15,9 @@ import { PrismaService } from '@app/prisma/prisma.service';
 import { Role, VerificationType } from '@prisma/client';
 import { SmsService } from '@app/sms/sms.service';
 import { ConfigService } from '@app/config/config.service';
-import { LoginDto } from './dto/login.dto';
 import { VerifyPhoneDto } from './dto/verify-phone.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { SendVerificationDto } from './dto/send-verification.dto';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -35,19 +32,18 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly smsService: SmsService,
-    private readonly configService: ConfigService,
   ) {}
 
-  async validateUser(phoneNumber: string, pass: string): Promise<any> {
+  async validateUser(phoneNumber: string, pass: string) {
     const user = await this.usersService.findByPhoneNumber(phoneNumber);
     if (user && (await bcrypt.compare(pass, user.password))) {
-      const { password, ...result } = user;
+      const { password: _, ...result } = user;
       return result;
     }
     return null;
   }
 
-  async login(user: any) {
+  async login(user: { id: string }) {
     const existingUser = await this.prisma.user.findUnique({
       where: { id: user.id },
       select: {
