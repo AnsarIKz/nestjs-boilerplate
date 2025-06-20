@@ -49,6 +49,12 @@ export default {
       process.env.STORAGE_ALLOWED_MIME_TYPES || 'image/jpeg,image/png,image/gif,application/pdf'
     ).split(','),
   },
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+    fromNumber: process.env.TWILIO_FROM_NUMBER,
+    whatsappNumber: process.env.TWILIO_WHATSAPP_NUMBER || 'whatsapp:+14155238886',
+  },
   datadog: {
     apiKey: process.env.DATADOG_API_KEY,
     serviceName: process.env.DATADOG_SERVICE_NAME || 'my-service',

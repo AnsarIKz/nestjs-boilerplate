@@ -1,44 +1,42 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength, IsOptional } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsPhoneNumber, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateAdminDto {
   @ApiProperty({
+    example: '+77001234567',
+    description: 'Admin phone number',
+  })
+  @IsPhoneNumber()
+  phoneNumber: string;
+
+  @ApiPropertyOptional({
     example: 'admin@example.com',
-    description: 'Email address of the admin',
+    description: 'Admin email address (optional)',
   })
   @IsEmail()
-  email: string;
+  @IsOptional()
+  email?: string;
 
   @ApiProperty({
-    example: 'Admin123!',
-    description: 'Password for the admin account',
+    example: 'adminPassword123',
+    description: 'Admin password',
   })
   @IsString()
-  @MinLength(8)
+  @MinLength(6)
   password: string;
 
   @ApiProperty({
-    example: 'John',
-    description: 'First name of the admin',
+    example: 'Admin',
+    description: 'Admin first name',
   })
   @IsString()
   firstName: string;
 
-  @ApiProperty({
-    example: 'Doe',
-    description: 'Last name of the admin',
-    required: false,
+  @ApiPropertyOptional({
+    example: 'User',
+    description: 'Admin last name',
   })
   @IsString()
   @IsOptional()
   lastName?: string;
-
-  @ApiProperty({
-    example: '+1234567890',
-    description: 'Phone number of the admin',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  phoneNumber?: string;
 }

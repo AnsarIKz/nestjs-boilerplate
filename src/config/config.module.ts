@@ -37,6 +37,10 @@ const createSchemaForEnv = (isProd: boolean) => {
     STRIPE_PUBLIC_KEY: Joi.string().required(),
     STRIPE_WEBHOOK_SECRET: Joi.string().required(),
     STRIPE_API_VERSION: Joi.string().required(),
+    TWILIO_ACCOUNT_SID: Joi.string().required(),
+    TWILIO_AUTH_TOKEN: Joi.string().required(),
+    TWILIO_FROM_NUMBER: Joi.string().optional(),
+    TWILIO_WHATSAPP_NUMBER: Joi.string().optional(),
   };
 
   // Datadog schema varies by environment

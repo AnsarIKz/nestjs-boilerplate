@@ -7,7 +7,7 @@ export class ChangePasswordDto {
     example: 'currentPassword123',
   })
   @IsString()
-  currentPassword: string;
+  oldPassword: string;
 
   @ApiProperty({
     description:

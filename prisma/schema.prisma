@@ -48,13 +48,20 @@ model RefreshToken {
 }
 
 model VerificationCode {
-  id        String   @id @default(uuid())
-  email     String
-  code      String
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  phoneNumber String
+  code        String
+  type        VerificationType @default(REGISTRATION)
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
 
+  @@index([phoneNumber])
   @@map("verification_codes")
+}
+
+enum VerificationType {
+  REGISTRATION
+  PASSWORD_RESET
 }
 
 enum Role {

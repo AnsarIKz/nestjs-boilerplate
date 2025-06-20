@@ -105,6 +105,15 @@ export class UsersService {
     return user;
   }
 
+  async findByPhoneNumber(phoneNumber: string) {
+    this.logger.debug(`Finding user with phone: ${phoneNumber}`);
+    const user = await this.prisma.user.findUnique({
+      where: { phoneNumber },
+    });
+
+    return user; // Don't throw error here, let auth service handle it
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     this.logger.debug(`Updating user with ID: ${id}`);
 

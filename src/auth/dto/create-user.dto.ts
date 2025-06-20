@@ -1,20 +1,23 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, Matches } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+  Matches,
+  IsPhoneNumber,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { i18nValidationMessage } from 'nestjs-i18n';
 
-export class CreateUserDto {
+export class SendVerificationCodeDto {
   @ApiProperty({
-    example: 'user@rama.gg',
-    description: 'User email address',
+    example: '+77001234567',
+    description: 'Phone number to send verification code to',
   })
-  @IsEmail(
-    {},
-    {
-      message: i18nValidationMessage('validate.email.invalid'),
-    },
-  )
-  @IsNotEmpty({
-    message: i18nValidationMessage('validate.email.required'),
+  @IsPhoneNumber(undefined, {
+    message: 'Phone number must be valid international format',
   })
-  readonly email: string;
+  @IsNotEmpty()
+  readonly phoneNumber: string;
 }
