@@ -25,8 +25,6 @@ import { AuthGuard } from '@nestjs/passport';
 import { MailerService } from '@app/mailer/mailer.service';
 import { ConfigService } from '@app/config/config.service';
 import { UsersService } from '@app/users/services/users.service';
-import { AuthInstanceInjectKey } from './auth.constant';
-import { InjectAuthInstance } from './auth.interface';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -46,8 +44,6 @@ export class AuthController {
     private readonly configService: ConfigService,
     private readonly mailerService: MailerService,
     private readonly authService: AuthService,
-    @Inject(AuthInstanceInjectKey)
-    private readonly authInstance: InjectAuthInstance,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -167,13 +163,6 @@ export class AuthController {
     this.logger.log(`Logging out user: ${req.user.userId}`);
     return this.authService.logout(req.user.userId);
   }
-
-  // @Get('providers')
-  // @ApiOperation({ summary: 'Get available auth providers' })
-  // @ApiResponse({ status: 200, description: 'List of providers' })
-  // getProviders() {
-  //   return this.authInstance.get().api.getProviders();
-  // }
 
   @Get('token')
   @ApiOperation({ summary: 'Verify or fetch a token' })

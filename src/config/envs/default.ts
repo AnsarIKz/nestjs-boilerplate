@@ -17,9 +17,6 @@ export default {
       refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key',
       refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '90d',
     },
-    betterAuth: {
-      allowed_origins: (process.env.ALLOWED_ORIGINS ?? '').split(', '),
-    },
   },
   cors: {
     enabled: true,
@@ -90,7 +87,7 @@ export default {
         clientId: process.env.APPLE_CLIENT_ID || '',
         clientSecret: process.env.APPLE_CLIENT_SECRET || '',
       },
-      // more please refer to https://github.com/better-auth/better-auth
+      // more providers can be added here
     },
   },
 };

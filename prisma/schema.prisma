@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,244 +11,38 @@ datasource db {
 }
 
 model User {
-  id                                                   String                @id @default(uuid())
-  email                                                String                @unique
-  password                                             String
-  firstName                                            String
-  lastName                                             String?
-  phoneNumber                                          String?               @unique
-  profileImageUrl                                      String?
-  language                                             String?               @default("en")
-  currency                                             String?               @default("KZT")
-  role                                                 Role                  @default(USER)
-  resetToken                                           String?               @unique
-  resetTokenExpiry                                     DateTime?
-  createdAt                                            DateTime              @default(now())
-  updatedAt                                            DateTime              @updatedAt
-  ChallengeComplaint_ChallengeComplaint_adminIdTousers ChallengeComplaint[]  @relation("ChallengeComplaint_adminIdTousers")
-  ChallengeComplaint_ChallengeComplaint_userIdTousers  ChallengeComplaint[]  @relation("ChallengeComplaint_userIdTousers")
-  ChatMessage_ChatMessage_receiverIdTousers            ChatMessage[]         @relation("ChatMessage_receiverIdTousers")
-  ChatMessage_ChatMessage_senderIdTousers              ChatMessage[]         @relation("ChatMessage_senderIdTousers")
-  Complaint_Complaint_adminIdTousers                   Complaint[]           @relation("Complaint_adminIdTousers")
-  Complaint_Complaint_userIdTousers                    Complaint[]           @relation("Complaint_userIdTousers")
-  DeviceToken                                          DeviceToken[]
-  Notification                                         Notification[]
-  PaymentMethod                                        PaymentMethod[]
-  RefreshToken                                         RefreshToken[]
-  SocialAccount                                        SocialAccount[]
-  SupportConversation                                  SupportConversation[]
-  SupportMessage                                       SupportMessage[]
-  Transaction                                          Transaction[]
-  Wallet                                               Wallet?
-  WithdrawalRequest_WithdrawalRequest_adminIdTousers   WithdrawalRequest[]   @relation("WithdrawalRequest_adminIdTousers")
-  WithdrawalRequest_WithdrawalRequest_userIdTousers    WithdrawalRequest[]   @relation("WithdrawalRequest_userIdTousers")
-  feedbacks                                            feedbacks[]
-  feeds                                                feeds[]
-  support_tickets_support_tickets_adminIdTousers       support_tickets[]     @relation("support_tickets_adminIdTousers")
-  support_tickets_support_tickets_userIdTousers        support_tickets[]     @relation("support_tickets_userIdTousers")
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  firstName       String?
+  lastName        String?
+  phoneNumber     String?   @unique
+  profileImageUrl String?
+  language        String?   @default("en")
+  currency        String?   @default("USD")
+  isActive        Boolean   @default(true)
+  role            Role      @default(USER)
+  resetToken      String?
+  resetTokenExpiry DateTime?
+  refreshTokens   RefreshToken[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@map("users")
 }
 
-model AuthAttempt {
-  id            String   @id
-  email         String
-  type          String
-  attempts      Int      @default(1)
-  isBlocked     Boolean  @default(false)
-  lastAttemptAt DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime
-
-  @@index([email, type])
-}
-
-model Challenge {
-  id                     String                   @id
-  productName            String
-  productDescription     String
-  rewardAmountPerAction  Float
-  supportedPlatforms     Platform[]
-  hashtags               String[]
-  description            String
-  videoExampleUrl        String?
-  textExample            String?
-  rules                  String[]
-  postFormats            String[]
-  additionalRequirements String[]
-  startDate              DateTime
-  endDate                DateTime
-  instruction            String
-  categoryId             String
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime
-  finishedAt             DateTime?
-  statusId               String
-  ChallengeCategory      ChallengeCategory        @relation(fields: [categoryId], references: [id])
-  ChallengeStatus        ChallengeStatus          @relation(fields: [statusId], references: [id])
-  ChallengeComplaint     ChallengeComplaint[]
-  ChallengeParticipation ChallengeParticipation[]
-}
-
-model ChallengeCategory {
-  id        String      @id
-  name      String      @unique
-  createdAt DateTime    @default(now())
-  updatedAt DateTime
-  Challenge Challenge[]
-}
-
-model ChallengeComplaint {
-  id                                      String            @id
-  userId                                  String
-  challengeId                             String
-  category                                ComplaintCategory
-  description                             String
-  status                                  String            @default("PENDING")
-  adminId                                 String?
-  response                                String?
-  createdAt                               DateTime          @default(now())
-  updatedAt                               DateTime
-  users_ChallengeComplaint_adminIdTousers User?             @relation("ChallengeComplaint_adminIdTousers", fields: [adminId], references: [id])
-  Challenge                               Challenge         @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  users_ChallengeComplaint_userIdTousers  User              @relation("ChallengeComplaint_userIdTousers", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([challengeId])
-  @@index([status])
-  @@index([userId])
-}
-
-model ChallengeParticipation {
-  id              String        @id
-  challengeId     String
-  socialAccountId String
-  submissionUrl   String?
-  submittedAt     DateTime?
-  approved        Boolean?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime
-  Challenge       Challenge     @relation(fields: [challengeId], references: [id])
-  SocialAccount   SocialAccount @relation(fields: [socialAccountId], references: [id], onDelete: Cascade)
-
-  @@unique([challengeId, socialAccountId])
-}
-
-model ChallengeStatus {
-  id           String      @id
-  code         String      @unique
-  translations Json
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime
-  Challenge    Challenge[]
-}
-
-model ChatMessage {
-  id                                  String   @id
-  senderId                            String
-  content                             String
-  createdAt                           DateTime @default(now())
-  receiverId                          String
-  users_ChatMessage_receiverIdTousers User     @relation("ChatMessage_receiverIdTousers", fields: [receiverId], references: [id], onDelete: Cascade)
-  users_ChatMessage_senderIdTousers   User     @relation("ChatMessage_senderIdTousers", fields: [senderId], references: [id], onDelete: Cascade)
-}
-
-model Complaint {
-  id                             String   @id
-  userId                         String
-  status                         String
-  createdAt                      DateTime @default(now())
-  adminId                        String?
-  content                        String
-  title                          String
-  updatedAt                      DateTime
-  users_Complaint_adminIdTousers User?    @relation("Complaint_adminIdTousers", fields: [adminId], references: [id])
-  users_Complaint_userIdTousers  User     @relation("Complaint_userIdTousers", fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model DeviceToken {
-  id        String   @id
-  userId    String
+model RefreshToken {
+  id        String   @id @default(uuid())
   token     String   @unique
-  platform  String
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, active])
-}
-
-model Notification {
-  id         String           @id
-  userId     String
-  createdAt  DateTime         @default(now())
-  content    String
-  read       Boolean          @default(false)
-  title      String
-  data       Json?
-  sentAsPush Boolean          @default(false)
-  type       NotificationType @default(GENERAL)
-  updatedAt  DateTime
-  users      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([createdAt])
-  @@index([userId, read])
-}
-
-model PaymentMethod {
-  id        String   @id
   userId    String
-  type      String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
   createdAt DateTime @default(now())
-  details   Json
-  updatedAt DateTime
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+  revoked   Boolean  @default(false)
+  ipAddress String?
+  userAgent String?
 
-model SocialAccount {
-  id                     String                   @id
-  userId                 String
-  platform               Platform
-  username               String
-  url                    String?
-  latestFollowersCount   Int                      @default(0)
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime
-  status                 SocialAccountStatus      @default(PENDING)
-  ChallengeParticipation ChallengeParticipation[]
-  users                  User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, platform, username])
-}
-
-model SupportConversation {
-  id             String           @id
-  userId         String
-  status         String           @default("Open")
-  openedAt       DateTime         @default(now())
-  closedAt       DateTime?
-  users          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  SupportMessage SupportMessage[]
-}
-
-model SupportMessage {
-  id                  String              @id
-  conversationId      String
-  senderId            String
-  content             String
-  createdAt           DateTime            @default(now())
-  SupportConversation SupportConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  users               User                @relation(fields: [senderId], references: [id], onDelete: Cascade)
-}
-
-model Transaction {
-  id        String   @id
-  userId    String
-  type      String
-  amount    Float
-  status    String
-  createdAt DateTime @default(now())
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@map("refresh_tokens")
 }
 
 model VerificationCode {
@@ -254,124 +51,11 @@ model VerificationCode {
   code      String
   expiresAt DateTime
   createdAt DateTime @default(now())
-}
 
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    String
-  expiresAt DateTime
-  revoked   Boolean  @default(false)
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([token])
-}
-
-model Wallet {
-  userId    String   @unique
-  balance   Float    @default(0.0)
-  updatedAt DateTime
-  createdAt DateTime @default(now())
-  id        String   @id
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model WithdrawalRequest {
-  id                                     String   @id
-  userId                                 String
-  amount                                 Float
-  status                                 String
-  adminId                                String?
-  createdAt                              DateTime @default(now())
-  updatedAt                              DateTime
-  users_WithdrawalRequest_adminIdTousers User?    @relation("WithdrawalRequest_adminIdTousers", fields: [adminId], references: [id])
-  users_WithdrawalRequest_userIdTousers  User     @relation("WithdrawalRequest_userIdTousers", fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model feedbacks {
-  id        String   @id
-  userId    String
-  subject   String
-  message   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model feeds {
-  id          String   @id
-  title       String
-  description String
-  bannerUrl   String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime
-  userId      String
-  users       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model support_tickets {
-  id                                   String              @id
-  userId                               String
-  subject                              String
-  description                          String
-  status                               SupportTicketStatus @default(OPEN)
-  adminId                              String?
-  response                             String?
-  respondedAt                          DateTime?
-  createdAt                            DateTime            @default(now())
-  updatedAt                            DateTime
-  users_support_tickets_adminIdTousers User?               @relation("support_tickets_adminIdTousers", fields: [adminId], references: [id])
-  users_support_tickets_userIdTousers  User                @relation("support_tickets_userIdTousers", fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([status])
-  @@index([userId])
+  @@map("verification_codes")
 }
 
 enum Role {
   USER
   ADMIN
-}
-
-enum ComplaintCategory {
-  UNPAID_REWARD
-  FRAUD_OR_SCAM
-  TERMS_VIOLATION
-  INAPPROPRIATE_BEHAVIOR
-  TECHNICAL_ISSUE
-}
-
-enum NotificationType {
-  GENERAL
-  CHALLENGE
-  PAYMENT
-  SOCIAL_VERIFICATION
-  SYSTEM
-}
-
-enum Platform {
-  INSTAGRAM
-  FACEBOOK
-  TWITTER
-  YOUTUBE
-  TIKTOK
-  LINKEDIN
-  OTHER
-}
-
-enum SocialAccountStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum SupportTicketStatus {
-  OPEN
-  IN_PROGRESS
-  RESOLVED
-  CLOSED
-}
+} 

@@ -8,8 +8,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 
-import { AuthInstanceInjectKey } from './auth.constant';
-import { InjectAuthInstance } from './auth.interface';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/services/users.service';
 import * as bcrypt from 'bcryptjs';
@@ -37,8 +35,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
     private readonly configService: ConfigService,
-    @Inject(AuthInstanceInjectKey)
-    private readonly authInstance: InjectAuthInstance,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
