@@ -11,22 +11,21 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  password        String
-  firstName       String?
-  lastName        String?
-  phoneNumber     String?   @unique
-  profileImageUrl String?
-  language        String?   @default("en")
-  currency        String?   @default("USD")
-  isActive        Boolean   @default(true)
-  role            Role      @default(USER)
-  resetToken      String?
+  id               String    @id @default(uuid())
+  email            String    @unique
+  password         String
+  firstName        String?
+  lastName         String?
+  phoneNumber      String?   @unique
+  profileImageUrl  String?
+  language         String?   @default("en")
+  currency         String?   @default("USD")
+  role             Role      @default(USER)
+  resetToken       String?   @unique
   resetTokenExpiry DateTime?
-  refreshTokens   RefreshToken[]
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  refreshTokens    RefreshToken[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@map("users")
 }
@@ -37,11 +36,14 @@ model RefreshToken {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
-  createdAt DateTime @default(now())
   revoked   Boolean  @default(false)
   ipAddress String?
   userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  @@index([userId])
+  @@index([token])
   @@map("refresh_tokens")
 }
 
