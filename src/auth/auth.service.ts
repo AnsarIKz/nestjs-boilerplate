@@ -235,6 +235,15 @@ export class AuthService {
 
   async sendVerificationCode(dto: SendVerificationCodeDto) {
     try {
+      // Check if user already exists
+      const existingUser = await this.prisma.user.findUnique({
+        where: { phoneNumber: dto.phoneNumber },
+      });
+
+      if (existingUser) {
+        throw new ConflictException('Account with this phone number already exists');
+      }
+
       // Generate and store verification code
       const code = await this.generateAndStoreCode(dto.phoneNumber, VerificationType.REGISTRATION);
 
@@ -254,8 +263,8 @@ export class AuthService {
     } catch (error) {
       this.logger.error(`Failed to send verification to ${dto.phoneNumber}:`, error);
 
-      // Re-throw BadRequestException with original message (cooldown, etc.)
-      if (error instanceof BadRequestException) {
+      // Re-throw specific exceptions with original message
+      if (error instanceof BadRequestException || error instanceof ConflictException) {
         throw error;
       }
 

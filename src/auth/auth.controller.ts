@@ -39,6 +39,7 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 400, description: 'Invalid phone number or send failed' })
+  @ApiResponse({ status: 409, description: 'Account with this phone number already exists' })
   async sendVerificationCode(@Body() dto: SendVerificationCodeDto) {
     this.logger.log(`Sending verification code to: ${dto.phoneNumber}`);
     return this.authService.sendVerificationCode(dto);
