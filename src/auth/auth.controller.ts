@@ -250,15 +250,39 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user session info' })
   @ApiResponse({
     status: 200,
-    description: 'Current user session',
-  })
-  getSession(@Request() req) {
-    return {
-      user: {
-        id: req.user.userId,
-        phoneNumber: req.user.phoneNumber,
-        role: req.user.role,
+    description: 'Current user session with full user information',
+    schema: {
+      example: {
+        data: {
+          user: {
+            id: '67c0118f-9a46-4313-abad-6bd50ec2f171',
+            email: '+77001016110@temp.local',
+            firstName: 'John',
+            lastName: 'Doe',
+            phoneNumber: '+77001016110',
+            profileImageUrl: null,
+            language: 'en',
+            currency: 'USD',
+            role: 'USER',
+            createdAt: '2024-12-20T10:30:00.000Z',
+            updatedAt: '2024-12-20T10:30:00.000Z',
+          },
+        },
+        statusCode: 200,
+        message: 'Success',
       },
+    },
+  })
+  async getSession(@Request() req) {
+    this.logger.log(`Getting session for user: ${req.user.userId}`);
+
+    // Fetch fresh user data from database
+    const user = await this.authService.getUserById(req.user.userId);
+
+    return {
+      data: { user },
+      statusCode: 200,
+      message: 'Success',
     };
   }
 }

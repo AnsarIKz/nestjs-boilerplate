@@ -52,6 +52,9 @@ export class AuthService {
         firstName: true,
         lastName: true,
         phoneNumber: true,
+        profileImageUrl: true,
+        language: true,
+        currency: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -63,9 +66,15 @@ export class AuthService {
     }
 
     const payload = {
-      phoneNumber: existingUser.phoneNumber,
       sub: existingUser.id,
+      phoneNumber: existingUser.phoneNumber,
       role: existingUser.role,
+      firstName: existingUser.firstName,
+      lastName: existingUser.lastName,
+      email: existingUser.email,
+      profileImageUrl: existingUser.profileImageUrl,
+      language: existingUser.language,
+      currency: existingUser.currency,
     };
     const accessToken = this.jwtService.sign(payload);
 
@@ -133,7 +142,17 @@ export class AuthService {
     }
 
     const user = refreshToken.user;
-    const payload = { phoneNumber: user.phoneNumber, sub: user.id, role: user.role };
+    const payload = {
+      sub: user.id,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      profileImageUrl: user.profileImageUrl,
+      language: user.language,
+      currency: user.currency,
+    };
     const accessToken = this.jwtService.sign(payload);
 
     // Optional: Create a new refresh token and revoke the old one for better security
@@ -287,6 +306,9 @@ export class AuthService {
         firstName: true,
         lastName: true,
         phoneNumber: true,
+        profileImageUrl: true,
+        language: true,
+        currency: true,
         role: true,
         createdAt: true,
         updatedAt: true,
@@ -294,7 +316,17 @@ export class AuthService {
     });
 
     // Generate tokens
-    const payload = { phoneNumber: user.phoneNumber, sub: user.id, role: user.role };
+    const payload = {
+      sub: user.id,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      profileImageUrl: user.profileImageUrl,
+      language: user.language,
+      currency: user.currency,
+    };
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.createRefreshToken(
       user.id,
@@ -439,5 +471,30 @@ export class AuthService {
     });
 
     return { message: 'Password reset successfully' };
+  }
+
+  async getUserById(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phoneNumber: true,
+        profileImageUrl: true,
+        language: true,
+        currency: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }
