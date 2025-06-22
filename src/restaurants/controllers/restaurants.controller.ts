@@ -142,6 +142,32 @@ export class RestaurantsController {
     return this.restaurantsService.update(id, updateRestaurantDto);
   }
 
+  @Get('top-features')
+  @ApiOperation({
+    summary: 'Получить топ-10 популярных фич ресторанов',
+    description: 'Получение списка самых популярных фич среди ресторанов',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Топ-10 фич с количеством ресторанов',
+    schema: {
+      example: {
+        data: [
+          { feature: 'WIFI', count: 150 },
+          { feature: 'PARKING', count: 120 },
+          { feature: 'OUTDOOR_SEATING', count: 100 },
+          { feature: 'LIVE_MUSIC', count: 85 },
+          { feature: 'BAR', count: 75 },
+        ],
+        statusCode: 200,
+        message: 'Success',
+      },
+    },
+  })
+  getTopFeatures() {
+    return this.restaurantsService.getTopFeatures();
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')

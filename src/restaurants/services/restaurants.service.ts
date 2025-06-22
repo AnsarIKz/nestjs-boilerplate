@@ -19,7 +19,15 @@ export class RestaurantsService {
   async findAll(
     searchDto?: SearchRestaurantsDto,
   ): Promise<{ restaurants: Restaurant[]; total: number }> {
-    const { page = 1, limit = 10, cuisine, priceRange, minRating, search } = searchDto || {};
+    const {
+      page = 1,
+      limit = 10,
+      cuisine,
+      priceRange,
+      minRating,
+      search,
+      features,
+    } = searchDto || {};
 
     const skip = (page - 1) * limit;
 
@@ -28,6 +36,10 @@ export class RestaurantsService {
       ...(cuisine && { cuisine: { has: cuisine } }),
       ...(priceRange && { priceRange }),
       ...(minRating && { rating: { gte: minRating } }),
+      ...(features &&
+        features.length > 0 && {
+          features: { hasEvery: features },
+        }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
@@ -126,5 +138,35 @@ export class RestaurantsService {
     }
 
     return timeSlots;
+  }
+
+  async getTopFeatures() {
+    // Get all restaurants with their features
+    const restaurants = await this.prisma.restaurant.findMany({
+      where: { isActive: true },
+      select: { features: true },
+    });
+
+    // Count features
+    const featureCount = new Map<string, number>();
+
+    restaurants.forEach((restaurant) => {
+      restaurant.features.forEach((feature) => {
+        const currentCount = featureCount.get(feature) || 0;
+        featureCount.set(feature, currentCount + 1);
+      });
+    });
+
+    // Convert to array and sort by count
+    const sortedFeatures = Array.from(featureCount.entries())
+      .map(([feature, count]) => ({ feature, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10); // Get top 10
+
+    return {
+      data: sortedFeatures,
+      statusCode: 200,
+      message: 'Success',
+    };
   }
 }

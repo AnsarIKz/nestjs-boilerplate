@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { PriceRange } from '@prisma/client';
+import { PriceRange, RestaurantFeature } from '@prisma/client';
 
 export class CreateRestaurantDto {
   @ApiProperty({
@@ -137,6 +137,18 @@ export class CreateRestaurantDto {
     return value;
   })
   openingHours: Record<string, { open: string; close: string }>;
+
+  @ApiProperty({
+    description: 'Особенности и удобства ресторана',
+    example: ['WIFI', 'PARKING', 'OUTDOOR_SEATING', 'LIVE_MUSIC', 'KHINKALI'],
+    enum: RestaurantFeature,
+    isArray: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(RestaurantFeature, { each: true })
+  features?: RestaurantFeature[];
 
   @ApiProperty({
     description: 'Активен ли ресторан',

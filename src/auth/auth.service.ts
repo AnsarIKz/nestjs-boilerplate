@@ -103,6 +103,8 @@ export class AuthService {
   }
 
   async createRefreshToken(userId: string, ipAddress?: string, userAgent?: string) {
+    this.logger.log(`Creating refresh token for user: ${userId}`);
+
     // Delete any expired refresh tokens for this user
     await this.prisma.refreshToken.deleteMany({
       where: {
@@ -117,6 +119,7 @@ export class AuthService {
     expiresAt.setDate(expiresAt.getDate() + this.JWT_REFRESH_EXPIRES_IN_DAYS);
 
     const token = uuidv4();
+    this.logger.log(`Generated UUID token: ${token}`);
 
     const refreshToken = await this.prisma.refreshToken.create({
       data: {
@@ -128,6 +131,7 @@ export class AuthService {
       },
     });
 
+    this.logger.log(`Refresh token created in DB:`, JSON.stringify(refreshToken, null, 2));
     return refreshToken;
   }
 
@@ -344,12 +348,17 @@ export class AuthService {
     );
 
     this.logger.log(`User created and verified: ${dto.phoneNumber}`);
-    return {
+    this.logger.log(`Generated refresh token: ${refreshToken.token}`);
+
+    const response = {
       access_token: accessToken,
       refresh_token: refreshToken.token,
       user,
       message: 'Account created successfully',
     };
+
+    this.logger.log(`Response object:`, JSON.stringify(response, null, 2));
+    return response;
   }
 
   async changePassword(userId: string, changePasswordDto: ChangePasswordDto): Promise<void> {

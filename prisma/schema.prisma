@@ -74,6 +74,7 @@ model Restaurant {
   capacity        Int
   imageUrls       String[]  @default([])
   openingHours    Json      // Format: {"monday": {"open": "09:00", "close": "22:00"}, ...}
+  features        RestaurantFeature[] @default([])
   isActive        Boolean   @default(true)
   bookings        Booking[]
   createdAt       DateTime  @default(now())
@@ -82,6 +83,7 @@ model Restaurant {
   @@index([cuisine])
   @@index([priceRange])
   @@index([rating])
+  @@index([features])
   @@index([isActive])
   @@map("restaurants")
 }
@@ -135,4 +137,46 @@ enum BookingStatus {
   CANCELLED
   COMPLETED
   NO_SHOW
+}
+
+enum RestaurantFeature {
+  WIFI
+  PARKING
+  OUTDOOR_SEATING
+  LIVE_MUSIC
+  KARAOKE
+  PRIVATE_DINING
+  KIDS_MENU
+  PLAYGROUND
+  PET_FRIENDLY
+  WHEELCHAIR_ACCESSIBLE
+  AIR_CONDITIONING
+  FIREPLACE
+  BAR
+  WINE_CELLAR
+  BUFFET
+  TAKEAWAY
+  DELIVERY
+  RESERVATION_REQUIRED
+  CREDIT_CARDS_ACCEPTED
+  CASH_ONLY
+  VEGAN_OPTIONS
+  GLUTEN_FREE_OPTIONS
+  HALAL_FOOD
+  KOSHER_FOOD
+  BREAKFAST
+  BRUNCH
+  LUNCH
+  DINNER
+  LATE_NIGHT
+  HOOKAH
+  GEORGIAN_CUISINE
+  KHINKALI
+  KHACHAPURI
+  MTSVADI
+  CHURCHKHELA
+  CHACHA_TASTING
+  TRADITIONAL_MUSIC
+  NATIONAL_COSTUMES
+  TAMADA_SERVICE
 } 
