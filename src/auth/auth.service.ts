@@ -86,9 +86,13 @@ export class AuthService {
     );
 
     return {
-      access_token: accessToken,
-      refresh_token: refreshToken.token,
-      user: existingUser,
+      data: {
+        access_token: accessToken,
+        refresh_token: refreshToken.token,
+        user: existingUser,
+      },
+      statusCode: 200,
+      message: 'Login successful',
     };
   }
 
@@ -173,8 +177,12 @@ export class AuthService {
     });
 
     return {
-      access_token: accessToken,
-      refresh_token: newRefreshToken.token,
+      data: {
+        access_token: accessToken,
+        refresh_token: newRefreshToken.token,
+      },
+      statusCode: 200,
+      message: 'Token refreshed successfully',
     };
   }
 
@@ -200,7 +208,11 @@ export class AuthService {
       data: { revoked: true },
     });
 
-    return { message: 'Logged out successfully' };
+    return {
+      data: null,
+      statusCode: 200,
+      message: 'Logged out successfully',
+    };
   }
 
   private async generateAndStoreCode(
@@ -262,6 +274,8 @@ export class AuthService {
 
       this.logger.log(`Verification code sent to ${dto.phoneNumber}`);
       return {
+        data: null,
+        statusCode: 200,
         message: 'Verification code sent to phone number. It will expire in 5 minutes.',
       };
     } catch (error) {
@@ -351,9 +365,12 @@ export class AuthService {
     this.logger.log(`Generated refresh token: ${refreshToken.token}`);
 
     const response = {
-      access_token: accessToken,
-      refresh_token: refreshToken.token,
-      user,
+      data: {
+        access_token: accessToken,
+        refresh_token: refreshToken.token,
+        user,
+      },
+      statusCode: 201,
       message: 'Account created successfully',
     };
 
@@ -424,14 +441,22 @@ export class AuthService {
     });
 
     this.logger.log(`Admin created: ${createAdminDto.phoneNumber}`);
-    return admin;
+    return {
+      data: admin,
+      statusCode: 201,
+      message: 'Admin created successfully',
+    };
   }
 
   async forgotPassword(phoneNumber: string) {
     const user = await this.prisma.user.findUnique({ where: { phoneNumber } });
     if (!user) {
       // Don't reveal if user exists or not
-      return { message: 'If the phone number exists, a reset code has been sent.' };
+      return {
+        data: null,
+        statusCode: 200,
+        message: 'If the phone number exists, a reset code has been sent.',
+      };
     }
 
     try {
@@ -442,7 +467,11 @@ export class AuthService {
         throw new BadRequestException('Failed to send reset SMS. Please try again later.');
       }
 
-      return { message: 'Password reset code sent to your phone.' };
+      return {
+        data: null,
+        statusCode: 200,
+        message: 'Password reset code sent to your phone.',
+      };
     } catch (error) {
       this.logger.error(`Failed to send password reset to ${phoneNumber}:`, error);
 
@@ -488,7 +517,11 @@ export class AuthService {
       data: { revoked: true },
     });
 
-    return { message: 'Password reset successfully' };
+    return {
+      data: null,
+      statusCode: 200,
+      message: 'Password reset successfully',
+    };
   }
 
   async getUserById(userId: string) {
@@ -513,6 +546,40 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    return user;
+    return {
+      data: user,
+      statusCode: 200,
+      message: 'User data retrieved successfully',
+    };
+  }
+
+  async deleteAccount(userId: string) {
+    this.logger.log(`Deleting account for user: ${userId}`);
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    try {
+      // Delete user and all related data (Prisma cascade will handle refresh tokens, bookings, etc.)
+      await this.prisma.user.delete({
+        where: { id: userId },
+      });
+
+      this.logger.log(`Account successfully deleted for user: ${userId}`);
+
+      return {
+        data: null,
+        statusCode: 200,
+        message: 'Account deleted successfully',
+      };
+    } catch (error) {
+      this.logger.error(`Failed to delete account for user ${userId}: ${error.message}`);
+      throw new BadRequestException('Failed to delete account. Please try again.');
+    }
   }
 }

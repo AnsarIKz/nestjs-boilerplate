@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { PriceRange, RestaurantFeature } from '@prisma/client';
+import { PriceRange, RestaurantFeature, CuisineType } from '@prisma/client';
 
 export class CreateRestaurantDto {
   @ApiProperty({
@@ -67,12 +67,14 @@ export class CreateRestaurantDto {
 
   @ApiProperty({
     description: 'Типы кухни',
-    example: ['Italian', 'Mediterranean'],
-    type: [String],
+    example: ['ITALIAN', 'GEORGIAN'],
+    enum: CuisineType,
+    isArray: true,
+    enumName: 'CuisineType',
   })
   @IsArray()
-  @IsString({ each: true })
-  cuisine: string[];
+  @IsEnum(CuisineType, { each: true })
+  cuisine: CuisineType[];
 
   @ApiProperty({
     description: 'Ценовая категория',
@@ -139,9 +141,50 @@ export class CreateRestaurantDto {
   openingHours: Record<string, { open: string; close: string }>;
 
   @ApiProperty({
-    description: 'Особенности и удобства ресторана',
+    description:
+      'Особенности и удобства ресторана. Включает: основные удобства (WIFI, PARKING, AIR_CONDITIONING), развлечения (LIVE_MUSIC, KARAOKE), семейные опции (KIDS_MENU, PLAYGROUND), диетические варианты (VEGAN_OPTIONS, HALAL_FOOD), грузинские особенности (KHINKALI, KHACHAPURI, GEORGIAN_CUISINE) и многое другое',
     example: ['WIFI', 'PARKING', 'OUTDOOR_SEATING', 'LIVE_MUSIC', 'KHINKALI'],
-    enum: RestaurantFeature,
+    enum: [
+      'WIFI',
+      'PARKING',
+      'OUTDOOR_SEATING',
+      'LIVE_MUSIC',
+      'KARAOKE',
+      'PRIVATE_DINING',
+      'KIDS_MENU',
+      'PLAYGROUND',
+      'PET_FRIENDLY',
+      'WHEELCHAIR_ACCESSIBLE',
+      'AIR_CONDITIONING',
+      'FIREPLACE',
+      'BAR',
+      'WINE_CELLAR',
+      'BUFFET',
+      'TAKEAWAY',
+      'DELIVERY',
+      'RESERVATION_REQUIRED',
+      'CREDIT_CARDS_ACCEPTED',
+      'CASH_ONLY',
+      'VEGAN_OPTIONS',
+      'GLUTEN_FREE_OPTIONS',
+      'HALAL_FOOD',
+      'KOSHER_FOOD',
+      'BREAKFAST',
+      'BRUNCH',
+      'LUNCH',
+      'DINNER',
+      'LATE_NIGHT',
+      'HOOKAH',
+      'GEORGIAN_CUISINE',
+      'KHINKALI',
+      'KHACHAPURI',
+      'MTSVADI',
+      'CHURCHKHELA',
+      'CHACHA_TASTING',
+      'TRADITIONAL_MUSIC',
+      'NATIONAL_COSTUMES',
+      'TAMADA_SERVICE',
+    ],
     isArray: true,
     required: false,
   })

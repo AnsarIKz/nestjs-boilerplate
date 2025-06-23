@@ -1,4 +1,4 @@
-import { Controller, Body, UseGuards, Get, Post, Request, Logger } from '@nestjs/common';
+import { Controller, Body, UseGuards, Get, Post, Request, Logger, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
@@ -34,6 +34,8 @@ export class AuthController {
     description: 'Verification code sent successfully',
     schema: {
       example: {
+        data: null,
+        statusCode: 200,
         message: 'Verification code sent to phone number. It will expire in 5 minutes.',
       },
     },
@@ -56,15 +58,18 @@ export class AuthController {
     description: 'User created and verified successfully',
     schema: {
       example: {
-        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        refresh_token: '123e4567-e89b-12d3-a456-426614174000',
-        user: {
-          id: 'uuid',
-          phoneNumber: '+77001234567',
-          firstName: 'John',
-          lastName: 'Doe',
-          role: 'USER',
+        data: {
+          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          refresh_token: '123e4567-e89b-12d3-a456-426614174000',
+          user: {
+            id: 'uuid',
+            phoneNumber: '+77001234567',
+            firstName: 'John',
+            lastName: 'Doe',
+            role: 'USER',
+          },
         },
+        statusCode: 201,
         message: 'Account created successfully',
       },
     },
@@ -87,15 +92,19 @@ export class AuthController {
     description: 'User logged in successfully',
     schema: {
       example: {
-        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        refresh_token: '123e4567-e89b-12d3-a456-426614174000',
-        user: {
-          id: 'uuid',
-          phoneNumber: '+77001234567',
-          firstName: 'John',
-          lastName: 'Doe',
-          role: 'USER',
+        data: {
+          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          refresh_token: '123e4567-e89b-12d3-a456-426614174000',
+          user: {
+            id: 'uuid',
+            phoneNumber: '+77001234567',
+            firstName: 'John',
+            lastName: 'Doe',
+            role: 'USER',
+          },
         },
+        statusCode: 200,
+        message: 'Login successful',
       },
     },
   })
@@ -125,8 +134,12 @@ export class AuthController {
     description: 'New access token generated successfully',
     schema: {
       example: {
-        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        refresh_token: '123e4567-e89b-12d3-a456-426614174000',
+        data: {
+          access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          refresh_token: '123e4567-e89b-12d3-a456-426614174000',
+        },
+        statusCode: 200,
+        message: 'Token refreshed successfully',
       },
     },
   })
@@ -148,6 +161,8 @@ export class AuthController {
     description: 'Logged out successfully',
     schema: {
       example: {
+        data: null,
+        statusCode: 200,
         message: 'Logged out successfully',
       },
     },
@@ -226,7 +241,11 @@ export class AuthController {
   async changePassword(@Request() req, @Body() changePasswordDto: ChangePasswordDto) {
     this.logger.log(`Password change requested for user: ${req.user.userId}`);
     await this.authService.changePassword(req.user.userId, changePasswordDto);
-    return { message: 'Password changed successfully' };
+    return {
+      data: null,
+      statusCode: 200,
+      message: 'Password changed successfully',
+    };
   }
 
   @Post('create-admin')
@@ -278,12 +297,40 @@ export class AuthController {
     this.logger.log(`Getting session for user: ${req.user.userId}`);
 
     // Fetch fresh user data from database
-    const user = await this.authService.getUserById(req.user.userId);
+    const userResponse = await this.authService.getUserById(req.user.userId);
 
     return {
-      data: { user },
+      data: { user: userResponse.data },
       statusCode: 200,
       message: 'Success',
     };
+  }
+
+  @Delete('delete-account')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete current user account permanently' })
+  @ApiResponse({
+    status: 200,
+    description: 'Account deleted successfully',
+    schema: {
+      example: {
+        data: null,
+        statusCode: 200,
+        message: 'Account deleted successfully',
+      },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - Authentication required',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Failed to delete account',
+  })
+  async deleteAccount(@Request() req) {
+    this.logger.log(`Account deletion requested for user: ${req.user.userId}`);
+    return this.authService.deleteAccount(req.user.userId);
   }
 }

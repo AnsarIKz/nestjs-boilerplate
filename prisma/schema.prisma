@@ -68,7 +68,7 @@ model Restaurant {
   phoneNumber     String
   email           String?
   website         String?
-  cuisine         String[]
+  cuisine         CuisineType[]
   priceRange      PriceRange @default(MODERATE)
   rating          Float?    @default(0)
   capacity        Int
@@ -77,6 +77,7 @@ model Restaurant {
   features        RestaurantFeature[] @default([])
   isActive        Boolean   @default(true)
   bookings        Booking[]
+  bills           Bill[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -103,6 +104,7 @@ model Booking {
   customerPhone String
   customerEmail String?
   notes         String?       // Internal notes for restaurant
+  bills         Bill[]        // Связанные счета
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -111,6 +113,57 @@ model Booking {
   @@index([bookingDate])
   @@index([status])
   @@map("bookings")
+}
+
+model Bill {
+  id            String        @id @default(uuid())
+  billNumber    String        @unique     // Уникальный номер счета (например, BILL-2024-001)
+  bookingId     String?                   // Связь с бронированием (может быть null для walk-in клиентов)
+  booking       Booking?      @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  restaurantId  String                    // Ресторан, который выставил счет
+  restaurant    Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  
+  // Информация о клиенте
+  customerName  String
+  customerPhone String?
+  customerEmail String?
+  
+  // Детали счета
+  items         Json          // Массив блюд: [{ name: "Хинкали", quantity: 10, price: 500, total: 5000 }]
+  itemsText     String        // Текстовое описание всех блюд для чтения
+  
+  // Финансовые данные
+  subtotal      Decimal       // Сумма без скидок и налогов
+  discountAmount Decimal      @default(0) // Размер скидки
+  discountPercent Float?      // Процент скидки
+  taxAmount     Decimal       @default(0) // Налог
+  taxPercent    Float?        // Процент налога
+  serviceCharge Decimal       @default(0) // Плата за обслуживание
+  totalAmount   Decimal       // Итоговая сумма к оплате
+  
+  // Статус и оплата
+  status        BillStatus    @default(PENDING)
+  paymentMethod PaymentMethod?
+  paidAt        DateTime?     // Время оплаты
+  
+  // Дополнительная информация
+  notes         String?       // Заметки к счету
+  receiptUrl    String?       // URL чека/квитанции
+  
+  // API интеграция
+  externalId    String?       // ID из внешней системы ресторана
+  externalData  Json?         // Дополнительные данные из API ресторана
+  
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([billNumber])
+  @@index([bookingId])
+  @@index([restaurantId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([externalId])
+  @@map("bills")
 }
 
 enum VerificationType {
@@ -137,6 +190,107 @@ enum BookingStatus {
   CANCELLED
   COMPLETED
   NO_SHOW
+}
+
+enum BillStatus {
+  PENDING      // Счет создан, ожидает оплаты
+  PAID         // Счет оплачен
+  CANCELLED    // Счет отменен
+  REFUNDED     // Счет возвращен
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  MOBILE_PAYMENT
+  CRYPTOCURRENCY
+}
+
+enum CuisineType {
+  GEORGIAN
+  ITALIAN
+  JAPANESE
+  CHINESE
+  KOREAN
+  INDIAN
+  THAI
+  VIETNAMESE
+  MEXICAN
+  AMERICAN
+  FRENCH
+  GERMAN
+  TURKISH
+  ARABIC
+  MEDITERRANEAN
+  EUROPEAN
+  ASIAN
+  KAZAKH
+  UZBEK
+  KYRGYZ
+  RUSSIAN
+  UKRAINIAN
+  ARMENIAN
+  AZERBAIJANI
+  GREEK
+  SPANISH
+  BRITISH
+  IRISH
+  LEBANESE
+  PERSIAN
+  AFGHAN
+  PAKISTANI
+  BANGLADESHI
+  SRI_LANKAN
+  NEPALESE
+  TIBETAN
+  MONGOLIAN
+  BRAZILIAN
+  ARGENTINIAN
+  PERUVIAN
+  CHILEAN
+  COLOMBIAN
+  VENEZUELAN
+  CUBAN
+  JAMAICAN
+  CARIBBEAN
+  AFRICAN
+  ETHIOPIAN
+  MOROCCAN
+  EGYPTIAN
+  TUNISIAN
+  SOUTH_AFRICAN
+  NIGERIAN
+  KENYAN
+  AUSTRALIAN
+  NEW_ZEALAND
+  FUSION
+  INTERNATIONAL
+  VEGETARIAN
+  VEGAN
+  GLUTEN_FREE
+  ORGANIC
+  FAST_FOOD
+  STREET_FOOD
+  SEAFOOD
+  STEAKHOUSE
+  BARBECUE
+  PIZZA
+  PASTA
+  SUSHI
+  RAMEN
+  BURGER
+  SANDWICH
+  SALAD
+  SOUP
+  DESSERT
+  BAKERY
+  CAFE
+  COFFEE
+  TEA
+  JUICE_BAR
+  SMOOTHIE
+  ICE_CREAM
 }
 
 enum RestaurantFeature {

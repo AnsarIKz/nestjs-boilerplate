@@ -12,6 +12,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { BookingsModule } from './bookings/bookings.module';
+import { AdminModule } from './admin/admin.module';
 import { I18nModule } from 'nestjs-i18n';
 import { CookieResolver, HeaderResolver, QueryResolver, AcceptLanguageResolver } from 'nestjs-i18n';
 
@@ -58,6 +59,7 @@ import { CookieResolver, HeaderResolver, QueryResolver, AcceptLanguageResolver }
     AuthModule,
     RestaurantsModule,
     BookingsModule,
+    AdminModule,
   ],
   controllers: [],
   providers: [

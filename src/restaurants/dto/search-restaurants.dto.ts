@@ -1,6 +1,6 @@
 import { IsOptional, IsString, IsEnum, IsNumber, IsArray, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
-import { PriceRange, RestaurantFeature } from '@prisma/client';
+import { PriceRange, RestaurantFeature, CuisineType } from '@prisma/client';
 
 export class SearchRestaurantsDto {
   @IsOptional()
@@ -17,8 +17,8 @@ export class SearchRestaurantsDto {
   limit?: number = 10;
 
   @IsOptional()
-  @IsString()
-  cuisine?: string;
+  @IsEnum(CuisineType)
+  cuisine?: CuisineType;
 
   @IsOptional()
   @IsEnum(PriceRange)

@@ -73,10 +73,10 @@ async function bootstrap() {
     // Register Fastify plugins
     logger.log('Registering Fastify plugins...');
 
-    await app.register(compression);
+    await app.register(compression as any);
     logger.log('✓ Compression plugin registered');
 
-    await app.register(helmet, {
+    await app.register(helmet as any, {
       contentSecurityPolicy: {
         directives: {
           defaultSrc: [`'self'`],
@@ -88,7 +88,7 @@ async function bootstrap() {
     });
     logger.log('✓ Helmet security plugin registered');
 
-    await app.register(cors, {
+    await app.register(cors as any, {
       origin: corsConfig?.origin || '*',
       credentials: corsConfig?.credentials || true,
     });
@@ -134,6 +134,7 @@ async function bootstrap() {
 
     logger.log(`🚀 Application is running on: ${appUrl}`);
     logger.log(`📡 API available at: ${appUrl}/${apiPrefix}`);
+    logger.log(`👨‍💼 Admin Panel: ${appUrl}/admin/`);
 
     if (process.env.NODE_ENV !== 'production') {
       const swaggerPath = swaggerConfig?.path || 'apidoc';
